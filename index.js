@@ -32,13 +32,7 @@ const app = express();
 app.use(express.json({ limit: '10mb' }));
 app.use(cors());
 
-// À appeler juste après le démarrage de ton tunnel Bore
-function updateTunnelConfig(url) {
-    // Sauvegarde dans un fichier JSON que PHP pourra lire
-    const config = { nodeUrl: url };
-    fs.writeFileSync('./tunnel_config.json', JSON.stringify(config));
-    console.log(`✅ Config mise à jour : ${url}`);
-}
+
 
 // Exemple d'usage quand tu récupères l'info de Bore :
 // updateTunnelConfig("http://bore.pub:58385");
@@ -49,7 +43,6 @@ const PHP_BASE_URL  = process.env.PHP_URL || 'https://wisedesign.pro/wabaperso';
 const INSTANCES_DIR = path.join(__dirname, 'instances');
 const STATE_FILE    = path.join(__dirname, 'channels.json');
 // Chemin spécifique vers ton installation Chrome à Bata
-const CHROME_PATH   = 'C:\\Users\\Wise Josias\\.cache\\puppeteer\\chrome\\win64-147.0.7727.57\\chrome-win64\\chrome.exe';
 
 if (!fs.existsSync(INSTANCES_DIR)) fs.mkdirSync(INSTANCES_DIR, { recursive: true });
 
@@ -103,15 +96,12 @@ app.post('/cleanup', async (req, res) => {
             const folderPath = path.join(instancesDir, folder);
             
             // Si mode 'all' ou si vous ajoutez une logique pour 'expired'
-            if (fs.lstatSync(folderPath).isDirectory()) {
-                // On tente de fermer la session si elle est en mémoire
-                if (sessions[folder]) {
-                    await sessions[folder].destroy().catch(() => {});
-                    delete sessions[folder];
-                }
-                // Suppression physique
-                fs.rmSync(folderPath, { recursive: true, force: true });
-            }
+            // À l'intérieur de la boucle for (const folder of folders)
+if (instances.has(folder)) {
+    const inst = instances.get(folder);
+    await inst.client.destroy().catch(() => {});
+    instances.delete(folder);
+}
         }
         res.json({ ok: true, message: "Dossiers supprimés" });
     } catch (e) {
@@ -121,24 +111,27 @@ app.post('/cleanup', async (req, res) => {
 
 
 // --- INITIALISATION CLIENT ---
-function createClient(channelId) {
+// --- FONCTION DE CRÉATION DE CLIENT ---
+function createClient(id) {
     return new Client({
         authStrategy: new LocalAuth({
-            clientId: channelId,
-            dataPath: path.join(INSTANCES_DIR, channelId),
+            clientId: id,
+            dataPath: './instances'
         }),
         puppeteer: {
-            executablePath: CHROME_PATH,
-            headless: "new",
+            headless: true,
             args: [
                 '--no-sandbox',
                 '--disable-setuid-sandbox',
                 '--disable-dev-shm-usage',
+                '--no-zygote',
+                '--single-process',
                 '--disable-gpu'
-            ],
-        },
+            ]
+        }
     });
 }
+
 
 function attachEvents(channelId, client) {
     const inst = instances.get(channelId);
@@ -221,9 +214,9 @@ app.post('/channels', async (req, res) => {
     saveState(channelsMeta);
 
 client.initialize().catch(e => {
-    logger(id, `Initialization error: ${e.message}`, 'ERROR');
-    // On met à jour l'instance pour que l'API sache pourquoi ça a échoué
-    const inst = instances.get(id);
+    // Utilise channelId qui est défini juste au-dessus
+    logger(channelId, `Initialization error: ${e.message}`, 'ERROR');
+    const inst = instances.get(channelId);
     if(inst) inst.lastError = e.message;
 });
 
