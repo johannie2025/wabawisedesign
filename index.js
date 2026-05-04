@@ -244,6 +244,27 @@ app.patch('/channels/:id/webhook', (req, res) => {
 // Santé du moteur
 app.get('/health', (req, res) => ok(res, { engine: 'waba-node', uptime: process.uptime() }));
 
+// --- SYSTÈME ANTI-VEILLE (RENDER STAY AWAKE) ---
+const RENDER_EXTERNAL_URL = process.env.RENDER_EXTERNAL_URL; // Variable auto-fournie par Render
+
+function keepAlive() {
+    if (!RENDER_EXTERNAL_URL) {
+        console.log("⚠️ RENDER_EXTERNAL_URL non définie. Le mode réveil est désactivé.");
+        return;
+    }
+
+    const url = `${RENDER_EXTERNAL_URL}/health`;
+    
+    // Ping toutes les 10 minutes (600 000 ms)
+    setInterval(() => {
+        https.get(url, (res) => {
+            console.log(`[Keep-Alive] Ping vers ${url} - Status: ${res.statusCode}`);
+        }).on('error', (err) => {
+            console.error(`[Keep-Alive] Erreur: ${err.message}`);
+        });
+    }, 600000); 
+}
+
 app.listen(PORT, async () => {
     console.log(`🚀 WABA Node Engine — http://localhost:${PORT}`);
     await restoreChannels();
