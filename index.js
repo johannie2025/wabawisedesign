@@ -106,19 +106,20 @@ function createClient(id) {
             clientId : id,
             dataPath : INSTANCES_DIR,
         }),
+        webVersionCache: {
+            type: 'remote',
+            remotePath: 'https://raw.githubusercontent.com/wppconnect-team/wa-js/main/dist/wppconnect-wa.js',
+        },
         puppeteer: {
-            headless      : chromium.headless ?? true,
-            executablePath: executablePath,   // null = Puppeteer local, string = Render
-            args          : [
-                ...( chromium.args || [] ),
+            headless : true,
+            protocolTimeout: 60000, // Ajouté : 60 secondes pour éviter le timeout
+            args: [
                 '--no-sandbox',
                 '--disable-setuid-sandbox',
                 '--disable-dev-shm-usage',
                 '--disable-gpu',
                 '--no-zygote',
                 '--single-process',
-                '--disable-extensions',
-                '--disable-background-networking',
             ],
         },
     });
