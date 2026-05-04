@@ -106,13 +106,9 @@ function createClient(id) {
             clientId : id,
             dataPath : INSTANCES_DIR,
         }),
-        webVersionCache: {
-            type: 'remote',
-            remotePath: 'https://raw.githubusercontent.com/wppconnect-team/wa-js/main/dist/wppconnect-wa.js',
-        },
         puppeteer: {
             headless : true,
-            protocolTimeout: 60000, // Ajouté : 60 secondes pour éviter le timeout
+            protocolTimeout: 60000,
             args: [
                 '--no-sandbox',
                 '--disable-setuid-sandbox',
