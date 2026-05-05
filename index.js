@@ -17,6 +17,16 @@ import { fileURLToPath } from 'url';
 import pkg from 'whatsapp-web.js';
 const { Client, LocalAuth, MessageMedia } = pkg;
 
+// ─── CHROMIUM (Render.com — pas de Chrome préinstallé) ────────────────────────
+import chromium from '@sparticuz/chromium';
+// Si chromium n'est pas dispo (dev local), on laisse Puppeteer chercher lui-même
+let executablePath = null;
+try {
+    executablePath = await chromium.executablePath();
+} catch {
+    executablePath = null; // fallback → Puppeteer utilise Chrome local
+}
+
 const __filename = fileURLToPath(import.meta.url);
 const __dirname  = path.dirname(__filename);
 
@@ -97,14 +107,18 @@ function createClient(id) {
             dataPath : INSTANCES_DIR,
         }),
         puppeteer: {
-            headless : true,
-            args: [
+            headless      : chromium.headless ?? true,
+            executablePath: executablePath,   // null = Puppeteer local, string = Render
+            args          : [
+                ...( chromium.args || [] ),
                 '--no-sandbox',
                 '--disable-setuid-sandbox',
                 '--disable-dev-shm-usage',
                 '--disable-gpu',
                 '--no-zygote',
                 '--single-process',
+                '--disable-extensions',
+                '--disable-background-networking',
             ],
         },
     });
@@ -554,7 +568,7 @@ function keepAlive() {
         }).on('error', (e) => {
             logger('keep-alive', `Ping error: ${e.message}`, 'WARN');
         });
-    }, 180_000); // toutes les 3 min
+    }, 600_000); // toutes les 10 min
 }
 
 // ═══════════════════════════════════════════════════════════════════════════════
