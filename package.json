@@ -1,22 +1,21 @@
 {
-  "name": "waba-node",
-  "version": "2.0.0",
+  "name": "waba-node-engine",
+  "version": "1.0.0",
   "type": "module",
-  "description": "WABA Node Engine — WhatsApp Web.js bridge for WABA SaaS",
   "main": "index.js",
   "scripts": {
     "start": "node index.js",
-    "dev": "nodemon index.js",
-	"postinstall": "npx puppeteer browsers install chrome"
+    "dev": "node --watch index.js"
+  },
+  "engines": {
+    "node": ">=18.0.0"
   },
   "dependencies": {
+    "@sparticuz/chromium": "^123.0.1",
     "cors": "^2.8.5",
     "express": "^4.18.2",
-    "puppeteer": "^24.42.0",
+    "puppeteer-core": "^22.6.0",
     "qrcode": "^1.5.3",
-    "whatsapp-web.js": "^1.34.7"
-  },
-  "devDependencies": {
-    "nodemon": "^3.0.1"
+    "whatsapp-web.js": "^1.26.0"
   }
 }
