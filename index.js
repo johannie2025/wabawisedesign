@@ -4,6 +4,27 @@
  * Corrigé — 4 Mai 2026
  */
 
+// Ajoutez cet import en haut de votre fichier
+import { executablePath } from 'puppeteer';
+
+function createClient(id) {
+    return new Client({
+        authStrategy: new LocalAuth({
+            clientId : id,
+            dataPath : INSTANCES_DIR,
+        }),
+        puppeteer: {
+            headless : true,
+            executablePath: executablePath(), // Force l'utilisation du Chrome installé
+            protocolTimeout: 60000,
+            args: [
+                '--no-sandbox',
+                '--disable-setuid-sandbox',
+                '--disable-dev-shm-usage',
+            ],
+        },
+    });
+}
 import express  from 'express';
 import path     from 'path';
 import fs       from 'fs';
