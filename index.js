@@ -4,8 +4,6 @@
  * Corrigé — 4 Mai 2026
  */
 
-// Ajoutez cet import en haut de votre fichier
-import { executablePath } from 'puppeteer';
 import express  from 'express';
 import path     from 'path';
 import fs       from 'fs';
@@ -98,9 +96,8 @@ function createClient(id) {
             clientId : id,
             dataPath : INSTANCES_DIR,
         }),
-         puppeteer: {
+        puppeteer: {
             headless : true,
-            protocolTimeout: 60000,
             args: [
                 '--no-sandbox',
                 '--disable-setuid-sandbox',
@@ -557,7 +554,7 @@ function keepAlive() {
         }).on('error', (e) => {
             logger('keep-alive', `Ping error: ${e.message}`, 'WARN');
         });
-    }, 600_000); // toutes les 10 min
+    }, 180_000); // toutes les 3 min
 }
 
 // ═══════════════════════════════════════════════════════════════════════════════
