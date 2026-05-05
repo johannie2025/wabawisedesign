@@ -100,7 +100,6 @@ function createClient(id) {
         }),
          puppeteer: {
             headless : true,
-            executablePath: executablePath(), // Force l'utilisation du Chrome installé
             protocolTimeout: 60000,
             args: [
                 '--no-sandbox',
